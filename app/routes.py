@@ -16,12 +16,12 @@ def index():
 
 @app.route('/restaurant/<restaurant>')
 @login_required
-def index():
+def restaurant():
     return render_template('restaurant.html')
 
 @app.route('/dish/<dish>')
 @login_required
-def index():
+def dish():
     return render_template('dish.html')
 
 
