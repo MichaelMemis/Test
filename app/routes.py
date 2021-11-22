@@ -11,6 +11,7 @@ from app.models import User, Dish, Restaurant, Review, Vote
 @app.route('/index')
 @login_required
 def index():
+    #random change
     return render_template('index.html')
 
 
