@@ -1,9 +1,9 @@
 from datetime import datetime
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EmptyForm
+from app.forms import LoginForm, RegistrationForm, EmptyForm, RestaurantForm, DishForm
 from app.models import User, Dish, Restaurant, Review, Vote
 
 
@@ -12,6 +12,7 @@ from app.models import User, Dish, Restaurant, Review, Vote
 @login_required
 def index():
     return render_template('index.html', title='Home')
+
 
 @app.route('/newrestaurant', methods=['GET', 'POST'])
 @login_required
@@ -26,6 +27,7 @@ def newrestaurant():
         db.session.commit()
         return render_template('index.html')
     return render_template('newrestaurant.html', title='Add a Restaurant', form=form)
+
 
 @app.route('/restaurants')
 def restaurants():
@@ -131,47 +133,78 @@ def user(username):
     return render_template('user.html', user=user, posts=posts.items,
                            next_url=next_url, prev_url=prev_url, form=form)
 
+
 @app.route('/populate_db', methods=['GET', 'POST'])
 def populate_db():
     clear_db()
-    a1 = Artist(name='The Gun Poets',
-                hometown='Ithaca',
-                description='Ithaca Hip Hop Band')
-    a2 = Artist(name='Stone Cold Miracle',
-                hometown='Fall Creek',
-                description='Funky Soul')
-    a3 = Artist(name='The New Team',
-                hometown='San Francisco',
-                description='They play new-age music. It sux.')
-    a4 = Artist(name='The Beatles',
-                hometown='England',
-                description='Old time classics.')
-    a5 = Artist(name='Sleepy Hallow',
-                hometown='Jamaica',
-                description='Party in the sky like its 2055.')
-    db.session.add_all([a1, a2, a3, a4, a5])
+    r1 = Restaurant(name='Ithaca Beer Co.',
+                    rating=5,
+                    description='This craft brewery features a taproom with '
+                                'industrial decor & offers tours on the weekends.',
+                    location='122 Ithaca Beer Dr, Ithaca, NY')
+    r2 = Restaurant(name='Texas Roadhouse',
+                    rating=3,
+                    description='Lively chain steakhouse serving American fare '
+                                'with a Southwestern spin amid Texas-themed decor.',
+                    location='719-25 S Meadow St, Ithaca, NY')
+    r3 = Restaurant(name='Old Mexico',
+                    rating=4,
+                    description='Vibrant, casual Mexican joint serving classic '
+                                'standards from fajitas to tequila drinks & beers.',
+                    location='357 Elmira Rd, Ithaca, NY')
+    db.session.add_all([r1, r2, r3])
 
-    v1 = Venue(name='Madison Square Garden', address='4 Pennsylvania Plaza, New York, NY', capacity=21000)
-    v2 = Venue(name='The Greek Theatre', address='2700 N Vermont Ave, Los Angeles, CA', capacity=6000)
-    v3 = Venue(name='The Dock', address='415 Old Taughannock Blvd, Ithaca, NY', capacity=250)
-    db.session.add_all([v1, v2, v3])
-
-    e1 = Event(name='Coachella', date=datetime(2022, 6, 12), venueID=3)
-    e2 = Event(name='Governors Ball', date=datetime(2021, 12, 21), venueID=3)
-    e3 = Event(name='Lalapalozza', date=datetime(2055, 2, 2), venueID=3)
-    e4 = Event(name='Woodstock', date=datetime(2023, 7, 30), venueID=2)
-    e5 = Event(name='Riot Fest', date=datetime(2024, 11, 30), venueID=1)
-    e6 = Event(name='Octoberfest', date=datetime(2022, 10, 31), venueID=2)
-    e7 = Event(name='Pitchfork Music Festival', date=datetime(2024, 1, 17), venueID=1)
-    db.session.add_all([e1, e2, e3, e4, e5, e6, e7])
-
-    t1 = ArtistToEvent(artistID=2, eventID=6)
-    t2 = ArtistToEvent(artistID=2, eventID=2)
-    t3 = ArtistToEvent(artistID=3, eventID=4)
-    t4 = ArtistToEvent(artistID=1, eventID=3)
-    t5 = ArtistToEvent(artistID=4, eventID=5)
-    db.session.add_all([t1, t2, t3, t4, t5])
+    d1 = Dish(name='Pepperoni Pizza',
+              rating=4,
+              price=16.00,
+              description='Garlic tomato sauce, fresh mozzarella, garlic-parm blend, pepperoni',
+              restaurantID=1)
+    d2 = Dish(name='Smokehouse Burger',
+              rating=5,
+              price=12.50,
+              description='Sautéed mushrooms, onions, BBQ sauce, lettuce, tomato and onion '
+                          'with American and jack cheeses served on a Texas-sized bun with steak '
+                          'fries and a pickle spear',
+              restaurantID=2)
+    d3 = Dish(name='Fajitas Texanas',
+              rating=4,
+              price=14.75,
+              description='A tempting combination of chicken, '
+                          'steak, and shrimp served piping hot.',
+              restaurantID=3)
+    db.session.add_all([d1, d2, d3])
     db.session.commit()
 
     return render_template('index.html')
 
+
+def clear_db():
+    flash("Resetting database: deleting old data and repopulating with dummy data")
+    meta = db.metadata
+    for table in reversed(meta.sorted_tables):
+        print('Clear table {}'.format(table))
+        db.session.execute(table.delete())
+
+
+@app.route('/_restaurant_autocomplete')
+def restaurant_autocomplete():
+    q = request.args.get('q', "")
+
+    matches = list()
+    for a in restaurant:
+        if a.lower().startswith(q.lower()):
+            matches.append(a)
+
+    return jsonify(result=matches)
+
+
+@app.route('/_dish_autocomplete')
+def dish_autocomplete():
+    q = request.args.get('q', "")
+
+    matches = list()
+    for a in dish:
+        if a.lower().startswith(q.lower()):
+            matches.append(a)
+
+    return jsonify(result=matches)

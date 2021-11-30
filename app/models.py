@@ -41,6 +41,7 @@ class Dish(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
     rating = db.Column(db.Integer)
+    price = db.Column(db.Float)
     description = db.Column(db.String(128), index=True)
     restaurantID = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
 
