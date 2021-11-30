@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>List of Dishes</h1>
+   {% for dish in dishes %}
+    <p><a href="{{ url_for('dish', name=dish.name) }}">{{ dish.name }}</a></p>
+{% endfor %}
+{%  endblock %}

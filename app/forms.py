@@ -34,3 +34,15 @@ class RegistrationForm(FlaskForm):
 
 class EmptyForm(FlaskForm):
     submit = SubmitField('Submit')
+
+
+class DishForm(FlaskForm):
+    rating = SelectField('Rating', coerce=int, choices=[0, 1, 2, 3, 4, 5], validators=[DataRequired()])
+    comments = TextAreaField('Comments (optional)', validators=[DataRequired()])
+    submit = SubmitField('Add Dish Review')
+
+
+class RestaurantForm(FlaskForm):
+    rating = SelectField('Rating', coerce=int, choices=[0, 1, 2, 3, 4, 5], validators=[DataRequired()])
+    comments = TextAreaField('Comments (optional)', validators=[DataRequired()])
+    submit = SubmitField('Add Restaurant Review')

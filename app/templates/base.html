@@ -2,7 +2,7 @@
 
 
 {% block title %}
-    {% if title %}{{ title }} - Everyone Eats% else %}Welcome to Everyone Eats{% endif %}
+    {% if title %}{{ title }} - Everyone Eats{% else %}Welcome to Everyone Eats{% endif %}
 {% endblock %}
     {% block navbar %}
      <nav class="navbar navbar-default">
@@ -19,9 +19,13 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="navbar-brand">
                     {% if current_user.is_anonymous %}
-
+                        <a href="{{ url_for('login') }}">Login</a>
                     {% else %}
-
+                        <a href={{ url_for('restaurants') }}>Restaurants</a>
+                        <a href={{ url_for('dishes') }}>Dishes</a>
+                        <a href={{ url_for('newrestaurant') }}>Add Restaurant</a>
+                        <a href={{ url_for('newdish') }}>Add Dish</a>
+                        <a href="{{ url_for('logout') }}">Logout</a>
                     {% endif %}
                 </ul>
             </div>

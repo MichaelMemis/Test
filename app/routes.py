@@ -11,18 +11,70 @@ from app.models import User, Dish, Restaurant, Review, Vote
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html')
+    return render_template('index.html', title='Home')
 
-
-@app.route('/restaurant/<restaurant>')
+@app.route('/newrestaurant', methods=['GET', 'POST'])
 @login_required
-def restaurant():
-    return render_template('restaurant.html')
+def newrestaurant():
+    form = RestaurantForm()
+    dish = {}
+    if form.validate_on_submit():
+        flash('New Restaurant added: {}'.format(form.name.data))
+        restaurant = Restaurant(name=form.name.data, rating=form.rating.data,
+                                description=form.description.data, location=form.location.data)
+        db.session.add(restaurant)
+        db.session.commit()
+        return render_template('index.html')
+    return render_template('newrestaurant.html', title='Add a Restaurant', form=form)
 
-@app.route('/dish/<dish>')
+@app.route('/restaurants')
+def restaurants():
+    restaurantlist = Restaurant.query.all()
+    return render_template('restaurants.html', title='Restaurants', restaurants=restaurantlist)
+
+
+@app.route('/restaurant/<name>')
 @login_required
-def dish():
-    return render_template('dish.html')
+def restaurant(name):
+    restaurant = Restaurant.query.filter_by(name=name).first()
+    if restaurant is None:
+        flash("Restaurant does not exist")
+        return render_template("index.html")
+    else:
+        return render_template("restaurant.html", title=restaurant, restaurant=restaurant)
+
+
+@app.route('/newdish', methods=['GET', 'POST'])
+@login_required
+def newdish():
+    form = DishForm()
+    form.restaurantID.choices = [(r.id, r.name) for r in Restaurant.query.all()]
+    dish = {}
+    if form.validate_on_submit():
+        flash('New Dish added: {}'.format(form.name.data))
+        dish = Dish(name=form.name.data, rating=form.rating.data,
+                    description=form.description.data, venueID=form.venueID.data)
+        db.session.add(dish)
+        db.session.commit()
+        return render_template('index.html')
+    return render_template('newdish.html', title='Add a Dish', form=form)
+
+
+@app.route('/dishes')
+def dishes():
+    dishlist = Dish.query.all()
+    return render_template('dishes.html', title='Dishes', dishes=dishlist)
+
+
+@app.route('/dish/<name>')
+@login_required
+def dish(name):
+    dish = Dish.query.filter_by(name=name).first()
+    if dish is None:
+        flash("Dish does not exist")
+        return render_template("index.html")
+    else:
+        return render_template("dish.html", title=dish, dish=dish)
 
 
 @app.route('/login', methods=['GET', 'POST'])
