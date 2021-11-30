@@ -5,12 +5,13 @@ from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EmptyForm, RestaurantForm, DishForm
 from app.models import User, Dish, Restaurant, Review, Vote
-
+import requests
 
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
+    #request.get(https://api.documenu.com/v2/restaurant/4072702673999819?key=c1da345dda931faa152f8c3b15e54250)
     return render_template('index.html', title='Home')
 
 
