@@ -9,6 +9,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    reviews = db.relationship('Review', backref='user', lazy='dynamic')
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -32,6 +33,8 @@ class Restaurant(db.Model):
     rating = db.Column(db.Integer)
     description = db.Column(db.String(128), index=True)
     location = db.Column(db.String(128), index=True, unique=True)
+    dishes = db.relationship('Dish', backref='restaurant', lazy='dynamic')
+    reviews = db.relationship('Review', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return '<Restaurant {}>'.format(self.name)
@@ -44,6 +47,7 @@ class Dish(db.Model):
     price = db.Column(db.Float)
     description = db.Column(db.String(128), index=True)
     restaurantID = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
+    reviews = db.relationship('Review', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return '<Dish {}>'.format(self.name)
