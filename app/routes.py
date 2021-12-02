@@ -44,7 +44,8 @@ def restaurant(name):
         flash("Restaurant does not exist")
         return render_template("index.html")
     else:
-        return render_template("restaurant.html", title=restaurant.name, restaurant=restaurant)
+        dishlist = Dish.query.join(RestaurantToDish).filter_by(restaurantID=restaurant.id).all()
+        return render_template("restaurant.html", title=restaurant.name, restaurant=restaurant, dish=dishlist)
 
 
 @app.route('/newdish', methods=['GET', 'POST'])
@@ -77,7 +78,8 @@ def dish(name):
         flash("Dish does not exist")
         return render_template("index.html")
     else:
-        return render_template("dish.html", title=dish.name, dish=dish)
+        restaurantlist = Restaurant.query.join(RestaurantToDish).filter_by(dishID=dish.id).all()
+        return render_template("dish.html", title=dish.name, dish=dish, restaurant=restaurantlist)
 
 
 @app.route('/login', methods=['GET', 'POST'])
