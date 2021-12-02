@@ -9,8 +9,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    reviews = db.relationship('Review', backref='user', lazy='dynamic')
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    reviews = db.relationship('Review', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -33,8 +33,8 @@ class Restaurant(db.Model):
     rating = db.Column(db.Integer)
     description = db.Column(db.String(128), index=True)
     location = db.Column(db.String(128), index=True, unique=True)
-    dishes = db.relationship('Dish', backref='restaurant', lazy='dynamic')
-    reviews = db.relationship('Review', backref='user', lazy='dynamic')
+    r2ds = db.relationship('RestaurantToDish', backref='restaurant', lazy='dynamic')
+    reviews = db.relationship('Review', backref='restaurant', lazy='dynamic')
 
     def __repr__(self):
         return '<Restaurant {}>'.format(self.name)
@@ -46,8 +46,8 @@ class Dish(db.Model):
     rating = db.Column(db.Integer)
     price = db.Column(db.Float)
     description = db.Column(db.String(128), index=True)
-    restaurantID = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
-    reviews = db.relationship('Review', backref='user', lazy='dynamic')
+    r2ds = db.relationship('RestaurantToDish', backref='dish', lazy='dynamic')
+    reviews = db.relationship('Review', backref='dish', lazy='dynamic')
 
     def __repr__(self):
         return '<Dish {}>'.format(self.name)
@@ -66,12 +66,20 @@ class Review(db.Model):
 
 
 class Vote(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        rating = db.Column(db.Integer)
-        user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-        reviewID = db.Column(db.Integer, db.ForeignKey('review.id'))
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    reviewID = db.Column(db.Integer, db.ForeignKey('review.id'))
 
-        def __repr__(self):
-            return '<Vote {}>'.format(self.body)
+    def __repr__(self):
+        return '<Vote {}>'.format(self.body)
 
+
+class RestaurantToDish(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    restaurantID = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
+    dishID = db.Column(db.Integer, db.ForeignKey('dish.id'))
+
+    def __repr__(self):
+        return '<Restaurant To Dish {}{}>'.format(self.restaurantID, self.dishID)
 

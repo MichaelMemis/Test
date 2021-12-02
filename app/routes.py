@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EmptyForm, RestaurantForm, DishForm
-from app.models import User, Dish, Restaurant, Review, Vote
+from app.models import User, Dish, Restaurant, Review, Vote, RestaurantToDish
 import requests
 
 @app.route('/')
@@ -44,7 +44,7 @@ def restaurant(name):
         flash("Restaurant does not exist")
         return render_template("index.html")
     else:
-        return render_template("restaurant.html", title=restaurant, restaurant=restaurant)
+        return render_template("restaurant.html", title=restaurant.name, restaurant=restaurant)
 
 
 @app.route('/newdish', methods=['GET', 'POST'])
@@ -77,7 +77,7 @@ def dish(name):
         flash("Dish does not exist")
         return render_template("index.html")
     else:
-        return render_template("dish.html", title=dish, dish=dish)
+        return render_template("dish.html", title=dish.name, dish=dish)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -131,7 +131,7 @@ def user(username):
     prev_url = url_for('user', username=user.username, page=reviews.prev_num) \
         if reviews.has_prev else None
     form = EmptyForm()
-    return render_template('user.html', user=user, posts=reviews.items,
+    return render_template('user.html', title=user.username, user=user, posts=reviews.items,
                            next_url=next_url, prev_url=prev_url, form=form)
 
 
@@ -158,22 +158,24 @@ def populate_db():
     d1 = Dish(name='Pepperoni Pizza',
               rating=4,
               price=16.00,
-              description='Garlic tomato sauce, fresh mozzarella, garlic-parm blend, pepperoni',
-              restaurantID=1)
+              description='Garlic tomato sauce, fresh mozzarella, garlic-parm blend, pepperoni')
     d2 = Dish(name='Smokehouse Burger',
               rating=5,
               price=12.50,
               description='Sautéed mushrooms, onions, BBQ sauce, lettuce, tomato and onion '
                           'with American and jack cheeses served on a Texas-sized bun with steak '
-                          'fries and a pickle spear',
-              restaurantID=2)
+                          'fries and a pickle spear')
     d3 = Dish(name='Fajitas Texanas',
               rating=4,
               price=14.75,
               description='A tempting combination of chicken, '
-                          'steak, and shrimp served piping hot.',
-              restaurantID=3)
+                          'steak, and shrimp served piping hot.')
     db.session.add_all([d1, d2, d3])
+
+    t1 = RestaurantToDish(restaurantID=1, dishID=1)
+    t2 = RestaurantToDish(restaurantID=2, dishID=2)
+    t3 = RestaurantToDish(restaurantID=3, dishID=3)
+    db.session.add_all([t1, t2, t3])
     db.session.commit()
 
     return render_template('index.html')

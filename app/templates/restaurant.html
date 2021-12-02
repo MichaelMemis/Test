@@ -4,13 +4,12 @@
     <h3>{{ restaurant.name}}</h3>
     <h4>{{ restaurant.location }}</h4>
 
-    <h4>{{ restaurant.rating }}</h4>
+    <h4>{{ restaurant.rating }}/5</h4>
     <p>{{ restaurant.description }}</p>
-    <h4>{{ restaurant.dish }}</h4>
 
     {% for dish in dishes %}
 
-        <li><a href="{{ url_for('dish', name=dish.name) }}">{{ dish.name }}</a></li>
+        <li><b>{{ dish.name }}</b></li>
 
     {% endfor %}
 

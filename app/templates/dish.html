@@ -2,10 +2,10 @@
 
 {% block app_content %}
     <h3>{{ dish.name}}</h3>
-    <!-- <h4>{{ restaurant.name }}</h4> -->
+    <h4>{{ dish.restaurantID }}</h4>
 
-    <h4>{{ dish.rating }}</h4>
-    <p>{{ dish.price }}</p>
+    <h4>{{ dish.rating }}/5</h4>
+    <p>{{ dish.price }}.0</p>
     <p>{{ dish.description }}</p>
 
 {%  endblock %}

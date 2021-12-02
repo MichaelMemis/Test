@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, PasswordField, BooleanField, SelectField, \
-    SelectMultipleField, IntegerField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
-from wtforms.fields.html5 import DateField
+from werkzeug.security import generate_password_hash, check_password_hash
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
+    TextAreaField, SelectField
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, \
+    Length
 from app.models import User
 
 
@@ -21,15 +22,11 @@ class RegistrationForm(FlaskForm):
         'Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Submit')
 
-    def validate_username(self, username):
-        user = User.query.filter_by(username=username.data).first()
-        if user is not None:
-            raise ValidationError('Please use a different username.')
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is not None:
-            raise ValidationError('Please use a different email address.')
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
 class EmptyForm(FlaskForm):
