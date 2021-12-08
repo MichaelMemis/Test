@@ -3,13 +3,13 @@ from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EmptyForm, RestaurantForm, DishForm
+from app.forms import LoginForm, RegistrationForm, EmptyForm, RestaurantForm, DishForm, EditProfileForm, \
+    RestaurantReviewForm, DishReviewForm
 from app.models import User, Dish, Restaurant, Review, Vote, RestaurantToDish
 import requests
 
 @app.route('/')
 @app.route('/index')
-@login_required
 def index():
     #request.get(https://api.documenu.com/v2/restaurant/4072702673999819?key=c1da345dda931faa152f8c3b15e54250)
     return render_template('index.html', title='Home')
@@ -44,20 +44,28 @@ def restaurant(name):
         flash("Restaurant does not exist")
         return render_template("index.html")
     else:
+        page = request.args.get('page', 1, type=int)
+        reviews = restaurant.reviews.order_by(Review.timestamp.desc()).paginate(
+            page, app.config['POSTS_PER_PAGE'], False)
+        next_url = url_for('user', username=user.username, page=reviews.next_num) \
+            if reviews.has_next else None
+        prev_url = url_for('user', username=user.username, page=reviews.prev_num) \
+            if reviews.has_prev else None
+        form = EmptyForm()
         dishlist = Dish.query.join(RestaurantToDish).filter_by(restaurantID=restaurant.id).all()
-        return render_template("restaurant.html", title=restaurant.name, restaurant=restaurant, dish=dishlist)
+        return render_template("restaurant.html", title=restaurant.name, restaurant=restaurant, dishes=dishlist,
+                               reviews=reviews.items, next_url=next_url, prev_url=prev_url, form=form)
 
 
 @app.route('/newdish', methods=['GET', 'POST'])
 @login_required
 def newdish():
     form = DishForm()
-    form.restaurantID.choices = [(r.id, r.name) for r in Restaurant.query.all()]
     dish = {}
     if form.validate_on_submit():
         flash('New Dish added: {}'.format(form.name.data))
         dish = Dish(name=form.name.data, rating=form.rating.data,
-                    description=form.description.data, venueID=form.venueID.data)
+                    description=form.description.data, price=form.price.data)
         db.session.add(dish)
         db.session.commit()
         return render_template('index.html')
@@ -78,8 +86,17 @@ def dish(name):
         flash("Dish does not exist")
         return render_template("index.html")
     else:
+        page = request.args.get('page', 1, type=int)
+        reviews = dish.reviews.order_by(Review.timestamp.desc()).paginate(
+            page, app.config['POSTS_PER_PAGE'], False)
+        next_url = url_for('user', username=user.username, page=reviews.next_num) \
+            if reviews.has_next else None
+        prev_url = url_for('user', username=user.username, page=reviews.prev_num) \
+            if reviews.has_prev else None
+        form = EmptyForm()
         restaurantlist = Restaurant.query.join(RestaurantToDish).filter_by(dishID=dish.id).all()
-        return render_template("dish.html", title=dish.name, dish=dish, restaurant=restaurantlist)
+        return render_template("dish.html", title=dish.name, dish=dish, restaurants=restaurantlist,
+                               reviews=reviews.items, next_url=next_url, prev_url=prev_url, form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -126,15 +143,59 @@ def register():
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     page = request.args.get('page', 1, type=int)
-    reviews = user.posts.order_by(Review.timestamp.desc()).paginate(
+    reviews = user.reviews.order_by(Review.timestamp.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
     next_url = url_for('user', username=user.username, page=reviews.next_num) \
         if reviews.has_next else None
     prev_url = url_for('user', username=user.username, page=reviews.prev_num) \
         if reviews.has_prev else None
     form = EmptyForm()
-    return render_template('user.html', title=user.username, user=user, posts=reviews.items,
+    return render_template('user.html', title=user.username, user=user, reviews=reviews.items,
                            next_url=next_url, prev_url=prev_url, form=form)
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm(current_user.username)
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.about_me = form.about_me.data
+        db.session.commit()
+        flash('Your changes have been saved.')
+        return redirect(url_for('edit_profile'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.about_me.data = current_user.about_me
+    return render_template('edit_profile.html', title='Edit Profile',
+                           form=form)
+
+@app.route('/addrestaurantreview', methods=['GET', 'POST'])
+@login_required
+def addrestaurantreview():
+    form = RestaurantReviewForm()
+    form.restaurantID.choices = [(r.id, r.name) for r in Restaurant.query.all()]
+    if form.validate_on_submit():
+        review = Review(body=form.body.data, rating=form.rating.data, user_id=current_user.id,
+                        restaurantID=form.restaurantID.data)
+        db.session.add(review)
+        db.session.commit()
+        flash('Your review is now live!')
+        return redirect(url_for('index'))
+    return render_template('addrestaurantreview.html', title='Add a Review', form=form)
+
+@app.route('/adddishreview', methods=['GET', 'POST'])
+@login_required
+def adddishreview():
+    form = DishReviewForm()
+    form.dishID.choices = [(d.id, d.name) for d in Dish.query.all()]
+    if form.validate_on_submit():
+        review = Review(body=form.body.data, rating=form.rating.data, user_id=current_user.id,
+                        dishID=form.dishID.data)
+        db.session.add(review)
+        db.session.commit()
+        flash('Your review is now live!')
+        return redirect(url_for('index'))
+    return render_template('adddishreview.html', title='Add a Review', form=form)
 
 
 @app.route('/populate_db', methods=['GET', 'POST'])

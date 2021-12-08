@@ -57,9 +57,11 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
     rating = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     restaurantID = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
     dishID = db.Column(db.Integer, db.ForeignKey('dish.id'))
+    users = db.relationship('User', overlaps="reviews,user")
 
     def __repr__(self):
         return '<Review {}>'.format(self.body)

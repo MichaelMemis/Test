@@ -17,14 +17,13 @@
                 <a class="navbar-brand" href="{{ url_for('index') }}">Home</a>
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="navbar-brand">
+                <ul class="navbar-brand ml-auto">
                     {% if current_user.is_anonymous %}
                         <a href="{{ url_for('login') }}">Login</a>
                     {% else %}
                         <a href={{ url_for('restaurants') }}>Restaurants</a>
                         <a href={{ url_for('dishes') }}>Dishes</a>
-                        <a href={{ url_for('newrestaurant') }}>Add Restaurant</a>
-                        <a href={{ url_for('newdish') }}>Add Dish</a>
+                        <a href="{{ url_for('user', username=current_user.username) }}">Profile</a>
                         <a href="{{ url_for('logout') }}">Logout</a>
                     {% endif %}
                 </ul>

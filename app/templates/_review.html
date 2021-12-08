@@ -1,5 +1,5 @@
     <table>
         <tr valign="top">
-            <td><a href="{{ url_for('user', username=review.user.username) }}">{{ review.user.username }}</a> says:<br>{{ review.body }}</td>
+            <td><a href="{{ url_for('user', username=review.user.username) }}">{{ review.user.username }}</a><p>{{ review.rating }}/5</p>says:<br>{{ review.body }}</td>
         </tr>
     </table>
