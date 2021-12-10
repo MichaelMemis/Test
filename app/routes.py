@@ -1,25 +1,32 @@
-from datetime import datetime
-from flask import render_template, flash, redirect, url_for, request, jsonify
+from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EmptyForm, RestaurantForm, DishForm, EditProfileForm, \
-    RestaurantReviewForm, DishReviewForm
-from app.models import User, Dish, Restaurant, Review, Vote, RestaurantToDish
-import requests
+    RestaurantReviewForm, DishReviewForm, SearchBarForm
+from app.models import User, Dish, Restaurant, Review, RestaurantToDish
+
 
 @app.route('/')
 @app.route('/index')
 def index():
-    #request.get(https://api.documenu.com/v2/restaurant/4072702673999819?key=c1da345dda931faa152f8c3b15e54250)
-    return render_template('index.html', title='Home')
+    form = SearchBarForm()
+    search = ''
+    if form.validate_on_submit():
+        input = form.search.data
+        if Restaurant.query.filter(Restaurant.name.contains(form.search.data)) is not None:
+            search = Restaurant.query.filter_by(Restaurant.name == input).first()
+
+        else:
+            search = Dish.query.filter_by(Dish.name == input).first()
+        return render_template('index.html', search=search)
+    return render_template('index.html', title='Home', form=form, search=search)
 
 
 @app.route('/newrestaurant', methods=['GET', 'POST'])
 @login_required
 def newrestaurant():
     form = RestaurantForm()
-    dish = {}
     if form.validate_on_submit():
         flash('New Restaurant added: {}'.format(form.name.data))
         restaurant = Restaurant(name=form.name.data, rating=form.rating.data,
@@ -61,7 +68,6 @@ def restaurant(name):
 @login_required
 def newdish():
     form = DishForm()
-    dish = {}
     if form.validate_on_submit():
         flash('New Dish added: {}'.format(form.name.data))
         dish = Dish(name=form.name.data, rating=form.rating.data,
@@ -153,20 +159,18 @@ def user(username):
     return render_template('user.html', title=user.username, user=user, reviews=reviews.items,
                            next_url=next_url, prev_url=prev_url, form=form)
 
-@app.route('/edit_profile', methods=['GET', 'POST'])
+@app.route('/editprofile', methods=['GET', 'POST'])
 @login_required
-def edit_profile():
+def editprofile():
     form = EditProfileForm(current_user.username)
     if form.validate_on_submit():
         current_user.username = form.username.data
-        current_user.about_me = form.about_me.data
         db.session.commit()
         flash('Your changes have been saved.')
-        return redirect(url_for('edit_profile'))
+        return redirect(url_for('editprofile'))
     elif request.method == 'GET':
         form.username.data = current_user.username
-        form.about_me.data = current_user.about_me
-    return render_template('edit_profile.html', title='Edit Profile',
+    return render_template('editprofile.html', title='Edit Profile',
                            form=form)
 
 @app.route('/addrestaurantreview', methods=['GET', 'POST'])
@@ -252,25 +256,25 @@ def clear_db():
         db.session.execute(table.delete())
 
 
-@app.route('/_restaurant_autocomplete')
-def restaurant_autocomplete():
-    q = request.args.get('q', "")
+##@app.route('/_restaurant_autocomplete')
+##def restaurant_autocomplete():
+    ##    q = request.args.get('q', "")
 
-    matches = list()
-    for a in restaurant:
-        if a.lower().startswith(q.lower()):
-            matches.append(a)
+    ##    matches = list()
+        ##    for a in restaurant:
+        ##        if a.lower().startswith(q.lower()):
+    ##            matches.append(a)
 
-    return jsonify(result=matches)
+##    return jsonify(result=matches)
 
 
-@app.route('/_dish_autocomplete')
-def dish_autocomplete():
-    q = request.args.get('q', "")
+##@app.route('/_dish_autocomplete')
+##def dish_autocomplete():
+    ##    q = request.args.get('q', "")
 
-    matches = list()
-    for a in dish:
-        if a.lower().startswith(q.lower()):
-            matches.append(a)
+    ##    matches = list()
+        ##    for a in dish:
+        ##        if a.lower().startswith(q.lower()):
+    ##            matches.append(a)
 
-    return jsonify(result=matches)
+##    return jsonify(result=matches)
