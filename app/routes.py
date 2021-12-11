@@ -37,10 +37,15 @@ def newrestaurant():
     return render_template('newrestaurant.html', title='Add a Restaurant', form=form)
 
 
-@app.route('/restaurants')
-def restaurants():
-    restaurantlist = Restaurant.query.all()
-    return render_template('restaurants.html', title='Restaurants', restaurants=restaurantlist)
+@app.route('/restaurants', methods=['GET', 'POST'])
+def restaurants(restauraunts=None):
+    form = SearchBarForm()
+    if form.validate_on_submit():
+        restaurauntlist = Restaurant.query.filter(Restaurant.name.contains(form.search.data)).all()
+    else:
+        restaurauntlist = Restaurant.query.all()
+    #restaurantlist = Restaurant.query.all()
+    return render_template('restaurants.html', title='Restaurants', restaurants=restaurauntlist, form=form)
 
 
 @app.route('/restaurant/<name>')
@@ -78,10 +83,15 @@ def newdish():
     return render_template('newdish.html', title='Add a Dish', form=form)
 
 
-@app.route('/dishes')
-def dishes():
-    dishlist = Dish.query.all()
-    return render_template('dishes.html', title='Dishes', dishes=dishlist)
+@app.route('/dishes', methods=['GET', 'POST'])
+def dishes(dishes=None):
+    form = SearchBarForm()
+    if form.validate_on_submit():
+        dishlist = Dish.query.filter(Dish.name.contains(form.search.data)).all()
+    else:
+        dishlist = Dish.query.all()
+   # dishlist = Dish.query.all()
+    return render_template('dishes.html', title='Dishes', dishes=dishlist, form=form)
 
 
 @app.route('/dish/<name>')
