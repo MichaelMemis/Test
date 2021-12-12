@@ -203,10 +203,6 @@ def adddishreview():
     return render_template('adddishreview.html', title='Add a Review', form=form)
 
 
-@app.route('/openstreetmap')
-def openstreetmap():
-    return render_template('openstreetmap.html', title='Map')
-
 @app.route('/populate_db', methods=['GET', 'POST'])
 def populate_db():
     clear_db()
@@ -233,7 +229,23 @@ def populate_db():
                     longitude=-76.5125,
                     latitude=42.4225
                     )
-    db.session.add_all([r1, r2, r3])
+    r4 = Restaurant(name='Ithaca Ale House',
+                    rating=3,
+                    description='Signature burgers & sandwiches complement this laid-back, '
+                                'stone-&-wood spots rotating craft beers.',
+                    location='301 E State St Suite 1, Ithaca, NY',
+                    longitude=-76.4960,
+                    latitude=42.4380
+                    )
+    r5 = Restaurant(name='MIX',
+                    rating=4,
+                    description='Vibrant spot offering eclectic small plates & '
+                                'seasonal cocktails, plus live jazz & blues on Sundays.',
+                    location=' 205 Elmira Rd, Ithaca, NY',
+                    longitude=-76.5050,
+                    latitude=42.4275
+                    )
+    db.session.add_all([r1, r2, r3, r4, r5])
 
     d1 = Dish(name='Pepperoni Pizza',
               rating=4,
@@ -250,12 +262,26 @@ def populate_db():
               price=14.75,
               description='A tempting combination of chicken, '
                           'steak, and shrimp served piping hot.')
-    db.session.add_all([d1, d2, d3])
+    d4 = Dish(name='Guacamole Brie Melt',
+              rating=3,
+              price=11.00,
+              description='Rustic grilled sourdough baguette topped '
+                          'with homemade guacamole, melted creamy Brie, '
+                          'sun-dried tomatoes, and oregano. Served with an '
+                          'ancho chili aioli')
+    d5 = Dish(name='Crispy Pork Bao Buns',
+              rating=5,
+              price=13.00,
+              description='Pressed pork belly, cilantro, pickled asian slaw, '
+                          'cashews, tamarind suki sauce')
+    db.session.add_all([d1, d2, d3, d4, d5])
 
     t1 = RestaurantToDish(restaurantID=1, dishID=1)
     t2 = RestaurantToDish(restaurantID=2, dishID=2)
     t3 = RestaurantToDish(restaurantID=3, dishID=3)
-    db.session.add_all([t1, t2, t3])
+    t4 = RestaurantToDish(restaurantID=4, dishID=4)
+    t5 = RestaurantToDish(restaurantID=5, dishID=5)
+    db.session.add_all([t1, t2, t3, t4, t5])
     db.session.commit()
 
     return render_template('index.html')
