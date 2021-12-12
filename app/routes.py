@@ -20,7 +20,8 @@ def newrestaurant():
     if form.validate_on_submit():
         flash('New Restaurant added: {}'.format(form.name.data))
         restaurant = Restaurant(name=form.name.data, rating=form.rating.data,
-                                description=form.description.data, location=form.location.data)
+                                description=form.description.data, location=form.location.data,
+                                longitude=form.longitude.data, latitude=form.latitude.data)
         db.session.add(restaurant)
         db.session.commit()
         return render_template('index.html')
@@ -220,12 +221,18 @@ def populate_db():
                     rating=3,
                     description='Lively chain steakhouse serving American fare '
                                 'with a Southwestern spin amid Texas-themed decor.',
-                    location='719-25 S Meadow St, Ithaca, NY')
+                    location='719-25 S Meadow St, Ithaca, NY',
+                    longitude=-76.5050,
+                    latitude=42.4312
+                    )
     r3 = Restaurant(name='Old Mexico',
                     rating=4,
                     description='Vibrant, casual Mexican joint serving classic '
                                 'standards from fajitas to tequila drinks & beers.',
-                    location='357 Elmira Rd, Ithaca, NY')
+                    location='357 Elmira Rd, Ithaca, NY',
+                    longitude=-76.5125,
+                    latitude=42.4225
+                    )
     db.session.add_all([r1, r2, r3])
 
     d1 = Dish(name='Pepperoni Pizza',
