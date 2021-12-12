@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
-    TextAreaField, SelectField, IntegerField
+    TextAreaField, SelectField, IntegerField, FloatField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import User
 
@@ -44,6 +44,8 @@ class RestaurantForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     rating = SelectField('Rating', coerce=int, choices=[0, 1, 2, 3, 4, 5], validators=[DataRequired()])
     location = StringField('Location', validators=[DataRequired()])
+    longitude = FloatField('Longitude', validators=[DataRequired()])
+    latitude = FloatField('Latitude', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     submit = SubmitField('Add Restaurant')
 
