@@ -10,17 +10,7 @@ from app.models import User, Dish, Restaurant, Review, RestaurantToDish
 @app.route('/')
 @app.route('/index')
 def index():
-    form = SearchBarForm()
-    search = ''
-    if form.validate_on_submit():
-        input = form.search.data
-        if Restaurant.query.filter(Restaurant.name.contains(form.search.data)) is not None:
-            search = Restaurant.query.filter_by(Restaurant.name == input).first()
-
-        else:
-            search = Dish.query.filter_by(Dish.name == input).first()
-        return render_template('index.html', search=search)
-    return render_template('index.html', title='Home', form=form, search=search)
+    return render_template('index.html', title='Home')
 
 
 @app.route('/newrestaurant', methods=['GET', 'POST'])
@@ -212,6 +202,10 @@ def adddishreview():
     return render_template('adddishreview.html', title='Add a Review', form=form)
 
 
+@app.route('/openstreetmap')
+def openstreetmap():
+    return render_template('openstreetmap.html', title='Map')
+
 @app.route('/populate_db', methods=['GET', 'POST'])
 def populate_db():
     clear_db()
@@ -219,7 +213,9 @@ def populate_db():
                     rating=5,
                     description='This craft brewery features a taproom with '
                                 'industrial decor & offers tours on the weekends.',
-                    location='122 Ithaca Beer Dr, Ithaca, NY')
+                    location='122 Ithaca Beer Dr, Ithaca, NY',
+                    longitude=-76.5350,
+                    latitude=42.4175)
     r2 = Restaurant(name='Texas Roadhouse',
                     rating=3,
                     description='Lively chain steakhouse serving American fare '
@@ -264,27 +260,3 @@ def clear_db():
     for table in reversed(meta.sorted_tables):
         print('Clear table {}'.format(table))
         db.session.execute(table.delete())
-
-
-##@app.route('/_restaurant_autocomplete')
-##def restaurant_autocomplete():
-    ##    q = request.args.get('q', "")
-
-    ##    matches = list()
-        ##    for a in restaurant:
-        ##        if a.lower().startswith(q.lower()):
-    ##            matches.append(a)
-
-##    return jsonify(result=matches)
-
-
-##@app.route('/_dish_autocomplete')
-##def dish_autocomplete():
-    ##    q = request.args.get('q', "")
-
-    ##    matches = list()
-        ##    for a in dish:
-        ##        if a.lower().startswith(q.lower()):
-    ##            matches.append(a)
-
-##    return jsonify(result=matches)

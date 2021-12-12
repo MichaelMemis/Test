@@ -33,6 +33,8 @@ class Restaurant(db.Model):
     rating = db.Column(db.Integer)
     description = db.Column(db.String(128), index=True)
     location = db.Column(db.String(128), index=True, unique=True)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
     r2ds = db.relationship('RestaurantToDish', backref='restaurant', lazy='dynamic')
     reviews = db.relationship('Review', backref='restaurant', lazy='dynamic')
 

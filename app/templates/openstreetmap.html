@@ -1,11 +1,4 @@
-{% extends "base.html" %}
-
-{% block app_content %}
-
-    <h3>{{ restaurant.name }}</h3>
-    <h4>{{ restaurant.location }}</h4>
-
-     <!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css"
@@ -43,13 +36,24 @@
         source: new ol.source.Vector({
           features: [
             new ol.Feature({
-              geometry: new ol.geom.Point(ol.proj.fromLonLat([{{ restaurant.longitude }},{{ restaurant.latitude }}]))
+              geometry: new ol.geom.Point(ol.proj.fromLonLat([-76.5350, 42.4175]))
             })
           ]
         })
       });
       map.addLayer(layer);
 
+// Add a Marker
+      var layer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+          features: [
+            new ol.Feature({
+              geometry: new ol.geom.Point(ol.proj.fromLonLat([-76.4030, 42.5217]))
+            })
+          ]
+        })
+      });
+      map.addLayer(layer);
 
       // Add a popup
       var container = document.getElementById('popup');
@@ -75,7 +79,7 @@
         if (map.hasFeatureAtPixel(event.pixel) === true) {
           var coordinate = event.coordinate;
 
-          content.innerHTML = '<b>{{ restaurant.name }}</b>';
+          content.innerHTML = '<b>Ithaca Beer Co.</b>';
           overlay.setPosition(coordinate);
         } else {
           overlay.setPosition(undefined);
@@ -87,7 +91,7 @@
         if (map.hasFeatureAtPixel(event.pixel) === true) {
           var coordinate = event.coordinate;
 
-          content.innerHTML = '<b>{{ restaurant.name }}</b>';
+          content.innerHTML = '<b>Ithaca Beer Co.</b>';
           overlay.setPosition(coordinate);
         } else {
           overlay.setPosition(undefined);
@@ -100,28 +104,3 @@
 
   </body>
 </html>
-
-    <h4>{{ restaurant.rating }}/5</h4>
-    <p>Description: {{ restaurant.description }}</p>
-    <p>Dishes from the Restaurant:</p>
-    {% for dish in dishes %}
-
-        <a href="{{ url_for('dish', name=dish.name) }}">{{ dish.name }}</a>
-
-    {% endfor %}
-
-    <hr>
-    {% for review in reviews %}
-        {% include '_review.html' %}
-    {% endfor %}
-    {% if prev_url %}
-    <a href="{{ prev_url }}">Newer posts</a>
-    {% endif %}
-    {% if next_url %}
-    <a href="{{ next_url }}">Older posts</a>
-    {% endif %}
-    <p></p>
-    <p></p>
-    <a href={{ url_for('addrestaurantreview') }}>Add Restaurant Review</a>
-
-{%  endblock %}

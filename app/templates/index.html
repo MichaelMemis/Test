@@ -3,22 +3,7 @@
 {% block app_content %}
     <h2><b>Everyone Eats</b></h2>
     <p>Real People. Real Reviews</p>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.search.label }}<br>
-            {{ form.search(size=32) }}<br>
-            {% for error in form.search.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
 
-    {% if search %}
 
-        <p><a href="{{ url_for('restaurant', name=restaurant.name) }}">{{ restaurant.name }}</a></p>
-        <p><a href="{{ url_for('dish', name=dish.name) }}">{{ dish.name }}</a>}</p>
-
-    {% endif %}
 {%  endblock %}
+
